@@ -1,0 +1,152 @@
+﻿@model MVCProject.ViewModels.ProductViewModel
+
+
+@{
+    string formAction = Model.ProductId > 0 ? "Create" : "Create";
+    string buttonText = Model.ProductId > 0 ? "Save Changes" : "Create Product";
+    string pageTitle = Model.ProductId > 0 ? "Edit Product" : "Create Product";
+}
+
+<style>
+     body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+        background-color: #f4f4f4; /* Set your desired background color */
+    }
+     h1 {
+        font-size: 2rem;
+        font-weight: bold;
+        margin-bottom: 30px;
+        text-align: center;
+       
+    }
+
+    .form-container {
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: #fff;
+        padding: 40px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .control-label {
+        font-weight: bold;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 10px;
+        border-radius: 5px;
+        border: 1px solid #ddd;
+    }
+
+    .text-danger {
+        color: #dc3545;
+    }
+
+    .form-check {
+        margin-top: 10px;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .btn-primary:hover {
+        background-color: #0056b3;
+    }
+
+    a {
+        color: #007bff;
+        text-decoration: none;
+        margin-right: 10px;
+    }
+    
+</style
+<body>
+    <div class="form-container">
+
+       <h1 style="font-size: 28px; font-weight: bold; text-align: center;">@pageTitle</h1>
+
+@using (Html.BeginForm(formAction, "Product", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+
+    @if (Model.ProductId > 0)
+    {
+        @Html.HiddenFor(model => model.ProductId)
+    }
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.Code, htmlAttributes: new { @class = "control-label" })
+        @Html.EditorFor(model => model.Code, new { htmlAttributes = new { @class = "form-control" } })
+        @Html.ValidationMessageFor(model => model.Code, "", new { @class = "text-danger" })
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.Name, htmlAttributes: new { @class = "control-label" })
+        @Html.EditorFor(model => model.Name, new { htmlAttributes = new { @class = "form-control" } })
+        @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.Description, htmlAttributes: new { @class = "control-label" })
+        @Html.EditorFor(model => model.Description, new { htmlAttributes = new { @class = "form-control" } })
+        @Html.ValidationMessageFor(model => model.Description, "", new { @class = "text-danger" })
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.ExpiryDate, htmlAttributes: new { @class = "control-label" })
+        <input type="date" asp-for="ExpiryDate" class="form-control" min="@DateTime.Now.ToString("yyyy-MM-dd")" />
+        @Html.ValidationMessageFor(model => model.ExpiryDate, "", new { @class = "text-danger" })
+    </div> 
+
+
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.Category, htmlAttributes: new { @class = "control-label" })
+        @Html.DropDownListFor(model => model.Category, new SelectList(new[] { "---Select---", "Category A", "Category B", "Category C", "Category D", "Category E" }), new { @class = "form-control" })
+        @Html.ValidationMessageFor(model => model.Category, "", new { @class = "text-danger" })
+    </div>
+
+
+
+   <div class="form-group">
+    @Html.LabelFor(model => model.Image, htmlAttributes: new { @class = "control-label" })
+    <input type="file" name="Image" id="Image" accept=".jpg, .jpeg, .png" />
+    @Html.ValidationMessageFor(model => model.Image, "", new { @class = "text-danger" })
+</div>
+
+
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.Status, htmlAttributes: new { @class = "control-label" })
+        <div class="form-check">
+            <label>
+                @Html.EditorFor(model => model.Status)
+                @Html.ValidationMessageFor(model => model.Status, "", new { @class = "text-danger" })
+            </label>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <input type="submit" value="@buttonText" class="btn btn-primary" />
+        @Html.ActionLink("Cancel", "Index")
+    </div>
+    <div>
+        <a asp-action="Index">Back to List</a>
+    </div>
+
+}
+    </div>
+</body>

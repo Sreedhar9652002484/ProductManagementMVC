@@ -1,0 +1,239 @@
+﻿@model PaginatedList<Product>
+@{
+    ViewData["Title"] = "Products";
+}
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+    <style>
+        /* CSS styles */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th {
+            background-color: #337ab7;
+            color: #fff;
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+            th:first-child {
+                border-top-left-radius: 5px;
+            }
+
+            th:last-child {
+                border-top-right-radius: 5px;
+            }
+
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        .product-description {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 200px; /* Adjust the max-width based on your layout */
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 6px 12px;
+            margin-bottom: 0;
+            font-size: 14px;
+            font-weight: 400;
+            line-height: 1.42857143;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: middle;
+            cursor: pointer;
+            border: 1px solid transparent;
+            border-radius: 4px;
+        }
+
+        .btn-primary {
+            color: #fff;
+            background-color: #337ab7;
+            border-color: #2e6da4;
+        }
+
+            .btn-primary.disabled,
+            .btn-primary:disabled {
+                background-color: #337ab7;
+                border-color: #337ab7;
+                opacity: 0.65;
+                cursor: not-allowed;
+            }
+
+            .btn-primary.delete-btn {
+                background-color: #d9534f;
+                border-color: #d43f3a;
+            }
+
+        .form-control {
+            width: 20px; /* Adjust the width as needed */
+            height: 34px;
+            padding: 6px 12px;
+            font-size: 14px;
+            line-height: 1.42857143;
+            color: #555;
+            background-color: #fff;
+            background-image: none;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            float: left; /* Align to the left side */
+        }
+
+       
+
+        .edit-delete-icons {
+            display: flex;
+            align-items: center;
+        }
+
+            .edit-delete-icons i {
+                font-size: 16px;
+                margin-right: 5px;
+            }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Products</h1>
+
+    <p>
+        <a asp-action="Create" class="btn btn-primary"><i class="fas fa-plus"></i> Product</a>
+    </p>
+
+    @using (Html.BeginForm("Index", "Product", FormMethod.Get))
+    {
+        <div class="input-group mb-3" style="width: 400px; position:relative; left:40vw;">
+            <input type="text" name="searchQuery" class="form-control" value="@ViewBag.CurrentFilter" placeholder="Search for Products" aria-label="Search" aria-describedby="basic-addon2">
+            <div class="input-group-append search-button">
+                <button class="btn btn-outline-secondary" type="submit"><i class="fas fa-search"></i></button>
+                <a class="btn btn-outline-secondary" href="@Url.Action("Index", "Product")"><i class="fas fa-times"></i></a>
+            </div>
+        </div>
+    }
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Code</th>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Expiry Date</th>
+                <th>Category</th>
+                <th>Image</th>
+                <th>Status</th>
+                <th>Creation Date</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@Html.DisplayFor(modelItem => item.Code)</td>
+                    <td>@Html.DisplayFor(modelItem => item.Name)</td>
+                    <td class="product-description">@Html.DisplayFor(modelItem => item.Description)</td>
+                    <td>@item.ExpiryDate.ToString("dd-MM-yyyy")</td>
+                    <td>@Html.DisplayFor(modelItem => item.Category)</td>
+                    <td><img src="@Url.Action("GetImage", "Product", new { id = item.ProductId })" alt="Product Image" width="100" height="100" /></td>
+                    <td>
+                        @if (item.Status)
+                        {
+                            <text>Active</text>
+                        }
+                        else
+                        {
+                            <text>Inactive</text>
+                        }
+                    </td>
+                    <td>@Html.DisplayFor(modelItem => item.CreationDate)</td>
+                    <td>
+                        <div class="edit-delete-icons">
+                            <a asp-action="Create" asp-route-id="@item.ProductId" class="btn btn-primary" style="background-color: green;">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <form asp-action="Delete" asp-route-id="@item.ProductId" method="post" onsubmit="return confirmDelete(event)">
+                                <input type="hidden" name="id" value="@item.ProductId" />
+                                <button type="submit" class="btn btn-primary delete-btn" style="background-color: red;">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                                @Html.AntiForgeryToken()
+                            </form>
+                        </div>
+                    </td>
+
+                </tr>
+            }
+        </tbody>
+
+    </table>
+
+    <div>
+        <!-- Previous button -->
+        <a asp-action="Index" asp-route-pageIndex="@(Model.PageIndex - 1)" class="btn btn-primary @(Model.HasPreviousPage ? "" : "disabled")">Previous</a>
+
+        @for (int i = 1; i <= Model.TotalPages; i++)
+        {
+            <a asp-action="Index" asp-route-pageIndex="@i" class="btn btn-primary @(Model.PageIndex == i ? "active" : "")">@i</a>
+        }
+
+        <!-- Next button -->
+        <a asp-action="Index" asp-route-pageIndex="@(Model.PageIndex + 1)" class="btn btn-primary @(Model.HasNextPage ? "" : "disabled")">Next</a>
+    </div>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script>
+        function confirmDelete(event) {
+            event.preventDefault();
+            const form = event.target;
+            swal({
+                title: "Are you sure?",
+                text: "Once deleted, you will not be able to recover this product!",
+                icon: "warning",
+                buttons: ["Cancel", "Delete"],
+                dangerMode: true,
+            }).then((willDelete) => {
+                if (willDelete) {
+                    form.submit();
+                    swal("Poof! Your product has been deleted!", {
+                        icon: "success",
+                    });
+                }
+            });
+        }
+    </script>
+
+
+</body>
+
+</html>
